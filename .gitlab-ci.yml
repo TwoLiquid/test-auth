@@ -1,0 +1,31 @@
+include:
+  - project: 'mellointeractive/common'
+    ref: main
+    file: '/pipelines/backend.gitlab-ci.yml'
+
+# ============================================================ OVERRIDE BUILD =
+Build Dev: # ============================================================ DEV =
+  stage: build
+  script:
+    - cp $ENV_FILE_DEV .env
+    - cp $OAUTH_PRIVATE_KEY storage/oauth-private.key
+    - cp $OAUTH_PUBLIC_KEY  storage/oauth-public.key
+    - docker build --pull -t $IMAGE_DEVELOP_TAG .
+    - docker push $IMAGE_DEVELOP_TAG
+  only:
+    - dev
+  tags:
+    - dev-runner
+
+Build Stage/Prod: # ============================================== STAGE/PROD =
+  stage: build
+  script:
+    - cp $ENV_FILE_PROD .env
+    - cp $OAUTH_PRIVATE_KEY storage/oauth-private.key
+    - cp $OAUTH_PUBLIC_KEY  storage/oauth-public.key
+    - docker build --pull -t $IMAGE_CURRENT_TAG .
+    - docker push $IMAGE_CURRENT_TAG
+  only:
+    - master
+  tags:
+    - stage-runner
